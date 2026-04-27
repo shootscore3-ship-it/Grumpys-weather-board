@@ -13,9 +13,7 @@
       --shadow: rgba(0, 0, 0, 0.35);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html, body {
       width: 100%;
@@ -27,15 +25,13 @@
       background: #0b1020;
     }
 
-    body {
-      position: relative;
-    }
+    body { position: relative; }
 
     .sky {
       position: fixed;
       inset: 0;
       overflow: hidden;
-      background: linear-gradient(180deg, #123a6f 0%, #69a9e8 52%, #f3c071 100%);
+      background: linear-gradient(180deg, #123a6f 0%, #69a9e8 56%, #bfd8e6 100%);
       transition: background 2s ease, filter 2s ease;
     }
 
@@ -44,15 +40,15 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at 50% 100%, rgba(255,255,255,0.14), transparent 42%),
-        linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.28));
+        radial-gradient(circle at 50% 105%, rgba(255,255,255,0.06), transparent 35%),
+        linear-gradient(180deg, rgba(0,0,0,0.01), rgba(0,0,0,0.14));
       pointer-events: none;
     }
 
     .celestial {
       position: absolute;
-      width: 120px;
-      height: 120px;
+      width: 124px;
+      height: 124px;
       border-radius: 50%;
       transform: translate(-50%, -50%);
       transition: left 2s ease, top 2s ease, opacity 2s ease, box-shadow 2s ease, background 2s ease;
@@ -60,8 +56,8 @@
     }
 
     .sun {
-      background: radial-gradient(circle, #fff6a6 0%, #ffd45a 48%, #ff9f2e 100%);
-      box-shadow: 0 0 70px rgba(255, 217, 92, 0.85), 0 0 150px rgba(255, 178, 55, 0.45);
+      background: radial-gradient(circle, #fff8b5 0%, #ffd85c 48%, #ff9f2e 100%);
+      box-shadow: 0 0 70px rgba(255, 217, 92, 0.82), 0 0 150px rgba(255, 178, 55, 0.42);
     }
 
     .moon {
@@ -86,6 +82,7 @@
       opacity: 0.35;
       transition: opacity 1.5s ease;
       pointer-events: none;
+      z-index: 3;
     }
 
     .cloud {
@@ -98,38 +95,22 @@
       animation: cloudMove linear infinite;
     }
 
-    .cloud::before,
-    .cloud::after {
+    .cloud::before, .cloud::after {
       content: "";
       position: absolute;
       border-radius: 50%;
       background: inherit;
     }
 
-    .cloud::before {
-      width: 112px;
-      height: 112px;
-      left: 42px;
-      top: -52px;
-    }
-
-    .cloud::after {
-      width: 138px;
-      height: 138px;
-      left: 112px;
-      top: -72px;
-    }
-
+    .cloud::before { width: 112px; height: 112px; left: 42px; top: -52px; }
+    .cloud::after { width: 138px; height: 138px; left: 112px; top: -72px; }
     .cloud.one { top: 120px; left: -320px; animation-duration: 95s; transform: scale(1.05); }
-    .cloud.two { top: 270px; left: -520px; animation-duration: 120s; transform: scale(0.78); opacity: 0.7; }
-    .cloud.three { top: 520px; left: -460px; animation-duration: 145s; transform: scale(1.25); opacity: 0.55; }
+    .cloud.two { top: 260px; left: -520px; animation-duration: 120s; transform: scale(0.78); opacity: 0.7; }
+    .cloud.three { top: 500px; left: -460px; animation-duration: 145s; transform: scale(1.18); opacity: 0.5; }
 
-    @keyframes cloudMove {
-      from { translate: -20vw 0; }
-      to { translate: 135vw 0; }
-    }
+    @keyframes cloudMove { from { translate: -20vw 0; } to { translate: 135vw 0; } }
 
-    .precip-layer {
+    .precip-layer, .holiday-layer {
       position: fixed;
       inset: 0;
       pointer-events: none;
@@ -148,9 +129,7 @@
       transform: rotate(12deg);
     }
 
-    @keyframes rainFall {
-      to { transform: translateY(116vh) translateX(-90px) rotate(12deg); }
-    }
+    @keyframes rainFall { to { transform: translateY(116vh) translateX(-90px) rotate(12deg); } }
 
     .flake {
       position: absolute;
@@ -163,8 +142,22 @@
       animation: snowFall linear infinite;
     }
 
-    @keyframes snowFall {
-      to { transform: translateY(112vh) translateX(70px); }
+    @keyframes snowFall { to { transform: translateY(112vh) translateX(70px); } }
+
+    .firework {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      box-shadow: 0 -38px 0 #fff, 27px -27px 0 #ffdf5a, 38px 0 0 #ff6666, 27px 27px 0 #68a7ff, 0 38px 0 #fff, -27px 27px 0 #ffdf5a, -38px 0 0 #ff6666, -27px -27px 0 #68a7ff;
+      animation: burst 1.8s ease-out infinite;
+      opacity: 0;
+    }
+
+    @keyframes burst {
+      0% { transform: scale(0.1); opacity: 0; }
+      25% { opacity: 1; }
+      100% { transform: scale(1.4); opacity: 0; }
     }
 
     .weather-app {
@@ -172,265 +165,165 @@
       z-index: 5;
       width: 100vw;
       height: 100vh;
-      padding: 54px 64px 48px;
+      padding: 40px 58px 34px;
       display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 34px;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 22px;
       text-shadow: 0 3px 16px var(--shadow);
     }
 
     .topbar {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      gap: 40px;
+      gap: 36px;
+    }
+
+    .logo-lockup { display: flex; align-items: center; gap: 20px; min-width: 0; }
+
+    .grumpys-logo {
+      width: 104px;
+      height: 104px;
+      object-fit: contain;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.92);
+      padding: 7px;
+      box-shadow: 0 16px 38px rgba(0,0,0,0.25);
+      flex: 0 0 auto;
     }
 
     .brand-title {
-      font-size: 58px;
+      font-size: 48px;
       line-height: 0.95;
-      font-weight: 900;
-      letter-spacing: -1.8px;
+      font-weight: 950;
+      letter-spacing: -1.6px;
       margin: 0;
+      white-space: nowrap;
     }
 
     .location {
-      margin-top: 10px;
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text-soft);
-      letter-spacing: 0.5px;
-    }
-
-    .clock {
-      text-align: right;
-      font-weight: 900;
-      font-size: 48px;
-      line-height: 1;
-    }
-
-    .date {
       margin-top: 8px;
       font-size: 22px;
+      font-weight: 800;
       color: var(--text-soft);
-      font-weight: 700;
+      letter-spacing: 0.4px;
     }
+
+    .clock { text-align: right; font-weight: 950; font-size: 44px; line-height: 1; white-space: nowrap; }
+    .date { margin-top: 8px; font-size: 20px; color: var(--text-soft); font-weight: 800; white-space: nowrap; }
+
+    .alert-banner {
+      display: none;
+      border: 2px solid rgba(255,255,255,0.45);
+      background: rgba(135, 18, 24, 0.80);
+      border-radius: 24px;
+      padding: 14px 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.26);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      min-height: 78px;
+    }
+
+    .alert-banner.show {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+    }
+
+    .alert-title { font-size: 28px; font-weight: 950; letter-spacing: -0.3px; }
+    .alert-detail { margin-top: 4px; font-size: 17px; font-weight: 800; color: rgba(255,255,255,0.84); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 1220px; }
+    .alert-badge { flex: 0 0 auto; padding: 11px 17px; border-radius: 999px; background: rgba(255,255,255,0.18); font-size: 17px; font-weight: 950; text-transform: uppercase; letter-spacing: 1px; }
 
     .main-grid {
       display: grid;
       grid-template-columns: 1.05fr 1fr;
-      gap: 34px;
+      gap: 30px;
       min-height: 0;
     }
 
     .glass-card {
       border: 1px solid var(--card-border);
       background: var(--card-bg);
-      border-radius: 34px;
+      border-radius: 32px;
       box-shadow: 0 26px 80px rgba(0,0,0,0.28);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
     }
 
     .current-card {
-      padding: 42px 46px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 0;
-    }
-
-    .condition-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 34px 40px;
+      display: grid;
+      grid-template-rows: auto auto auto;
+      align-content: start;
       gap: 24px;
-    }
-
-    .temp {
-      font-size: 178px;
-      line-height: 0.9;
-      font-weight: 950;
-      letter-spacing: -9px;
-    }
-
-    .condition-icon {
-      font-size: 130px;
-      filter: drop-shadow(0 12px 22px rgba(0,0,0,0.28));
-    }
-
-    .condition-text {
-      font-size: 48px;
-      font-weight: 900;
-      margin-top: 20px;
-      letter-spacing: -0.8px;
-    }
-
-    .feels-like {
-      font-size: 28px;
-      color: var(--text-soft);
-      font-weight: 800;
-      margin-top: 8px;
-    }
-
-    .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
-      margin-top: 34px;
-    }
-
-    .stat {
-      background: rgba(255,255,255,0.13);
-      border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 24px;
-      padding: 20px 22px;
-    }
-
-    .stat-label {
-      font-size: 18px;
-      color: var(--text-soft);
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-    }
-
-    .stat-value {
-      margin-top: 7px;
-      font-size: 34px;
-      font-weight: 950;
-    }
-
-    .side-stack {
-      display: grid;
-      grid-template-rows: 1fr 1.15fr;
-      gap: 34px;
       min-height: 0;
     }
 
-    .hourly-card,
-    .daily-card {
-      padding: 28px;
-      min-height: 0;
+    .condition-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .temp { font-size: 156px; line-height: 0.9; font-weight: 950; letter-spacing: -8px; }
+
+    .weather-visual {
+      width: 180px;
+      height: 180px;
+      position: relative;
+      flex: 0 0 auto;
+      filter: drop-shadow(0 14px 26px rgba(0,0,0,0.32));
     }
 
-    .section-title {
-      margin: 0 0 18px;
-      font-size: 27px;
-      font-weight: 950;
-      letter-spacing: -0.3px;
-    }
+    .mini-sun, .mini-moon, .mini-cloud, .mini-rain, .mini-snow { position: absolute; }
+    .mini-sun { width: 86px; height: 86px; border-radius: 50%; background: #ffd85c; left: 36px; top: 26px; box-shadow: 0 0 40px rgba(255,216,92,0.8); animation: pulseSun 3s ease-in-out infinite; }
+    @keyframes pulseSun { 50% { transform: scale(1.06); } }
+    .mini-moon { width: 82px; height: 82px; border-radius: 50%; background: #e8f0ff; left: 42px; top: 28px; box-shadow: 0 0 30px rgba(210,225,255,0.6); }
+    .mini-moon::after { content:""; position:absolute; width:68px; height:68px; border-radius:50%; background:rgba(18,32,58,0.62); left:24px; top:4px; }
+    .mini-cloud { width: 134px; height: 48px; border-radius: 999px; background: rgba(255,255,255,0.92); left: 22px; top: 78px; animation: cloudBob 3.5s ease-in-out infinite; }
+    .mini-cloud::before, .mini-cloud::after { content:""; position:absolute; border-radius:50%; background:inherit; }
+    .mini-cloud::before { width:62px; height:62px; left:24px; top:-31px; }
+    .mini-cloud::after { width:74px; height:74px; left:64px; top:-42px; }
+    @keyframes cloudBob { 50% { transform: translateY(-7px); } }
+    .mini-rain { left: 50px; top: 122px; width: 8px; height: 34px; border-radius: 999px; background:#cfeaff; box-shadow: 32px 4px 0 #cfeaff, 64px -2px 0 #cfeaff; animation: miniRain 0.8s linear infinite; }
+    @keyframes miniRain { to { transform: translateY(18px); opacity: 0.2; } }
+    .mini-snow { left: 48px; top: 126px; width: 11px; height: 11px; border-radius:50%; background:white; box-shadow: 35px 8px 0 white, 72px 1px 0 white, 18px 34px 0 white, 58px 38px 0 white; animation: miniSnow 2s linear infinite; }
+    @keyframes miniSnow { to { transform: translateY(20px); opacity: 0.25; } }
 
-    .hour-row {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 12px;
-    }
+    .condition-text { font-size: 44px; font-weight: 950; letter-spacing: -0.7px; }
+    .feels-like { font-size: 26px; color: var(--text-soft); font-weight: 850; margin-top: 6px; }
+    .summary-line { margin-top: 12px; font-size: 25px; line-height: 1.25; font-weight: 900; color: rgba(255,255,255,0.90); }
 
-    .hour-box {
-      text-align: center;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 22px;
-      padding: 16px 8px 14px;
-      min-width: 0;
-    }
+    .stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 8px; }
+    .stat { background: rgba(255,255,255,0.13); border: 1px solid rgba(255,255,255,0.16); border-radius: 24px; padding: 22px 24px; }
+    .stat-label { font-size: 19px; color: var(--text-soft); font-weight: 900; text-transform: uppercase; letter-spacing: 1.2px; }
+    .stat-value { margin-top: 8px; font-size: 37px; font-weight: 950; }
 
-    .hour-time {
-      font-size: 17px;
-      font-weight: 900;
-      color: var(--text-soft);
-    }
+    .side-stack { display: grid; grid-template-rows: 0.82fr 1.38fr; gap: 30px; min-height: 0; }
+    .hourly-card, .daily-card { padding: 24px; min-height: 0; overflow: hidden; }
+    .section-title { margin: 0 0 16px; font-size: 26px; font-weight: 950; letter-spacing: -0.3px; }
+    .hour-row { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 11px; }
+    .hour-box { text-align: center; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); border-radius: 21px; padding: 13px 6px 12px; min-width: 0; }
+    .hour-time { font-size: 16px; font-weight: 900; color: var(--text-soft); }
+    .hour-icon { font-size: 31px; margin: 7px 0 4px; }
+    .hour-temp { font-size: 28px; font-weight: 950; }
 
-    .hour-icon {
-      font-size: 34px;
-      margin: 8px 0 5px;
-    }
+    .daily-list { display: grid; grid-template-rows: repeat(5, 1fr); gap: 11px; height: calc(100% - 46px); min-height: 0; }
+    .day-row { display: grid; grid-template-columns: 1.08fr 58px 1fr 74px; align-items: center; gap: 14px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); border-radius: 21px; padding: 12px 18px; font-weight: 950; min-height: 0; }
+    .day-name { font-size: 24px; }
+    .day-icon { font-size: 32px; text-align: center; }
+    .day-range { font-size: 27px; text-align: right; }
+    .day-pop { text-align: right; font-size: 20px; color: var(--text-soft); }
 
-    .hour-temp {
-      font-size: 30px;
-      font-weight: 950;
-    }
+    .footer { display: flex; justify-content: flex-start; align-items: center; gap: 18px; color: rgba(255,255,255,0.76); font-size: 17px; font-weight: 800; min-height: 40px; }
+    .status-pill { padding: 10px 16px; border-radius: 999px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.16); }
 
-    .daily-list {
-      display: grid;
-      gap: 12px;
-    }
-
-    .day-row {
-      display: grid;
-      grid-template-columns: 1.1fr 56px 1fr 70px;
-      align-items: center;
-      gap: 14px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 21px;
-      padding: 13px 18px;
-      font-weight: 900;
-    }
-
-    .day-name {
-      font-size: 22px;
-    }
-
-    .day-icon {
-      font-size: 31px;
-      text-align: center;
-    }
-
-    .day-range {
-      font-size: 24px;
-      text-align: right;
-    }
-
-    .day-pop {
-      text-align: right;
-      font-size: 19px;
-      color: var(--text-soft);
-    }
-
-    .footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 24px;
-      color: rgba(255,255,255,0.74);
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .status-pill {
-      padding: 12px 18px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.16);
-    }
-
-    .loading {
-      position: fixed;
-      inset: 0;
-      z-index: 20;
-      display: grid;
-      place-items: center;
-      background: #07101f;
-      color: white;
-      font-size: 36px;
-      font-weight: 900;
-      transition: opacity 0.6s ease;
-    }
-
-    .loading.hide {
-      opacity: 0;
-      pointer-events: none;
-    }
+    .loading { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: #07101f; color: white; font-size: 36px; font-weight: 900; transition: opacity 0.6s ease; }
+    .loading.hide { opacity: 0; pointer-events: none; }
 
     @media (max-width: 1200px) {
-      .weather-app { padding: 34px; gap: 20px; }
-      .brand-title { font-size: 42px; }
-      .clock { font-size: 38px; }
+      .weather-app { padding: 30px; gap: 18px; }
+      .brand-title { font-size: 38px; }
+      .clock { font-size: 34px; }
       .main-grid { grid-template-columns: 1fr; }
-      .temp { font-size: 122px; }
-      .condition-icon { font-size: 92px; }
+      .temp { font-size: 118px; }
+      .weather-visual { width: 138px; height: 138px; }
       .condition-text { font-size: 34px; }
       .side-stack { grid-template-rows: auto auto; }
     }
@@ -448,13 +341,17 @@
   </div>
 
   <div class="precip-layer" id="precipLayer"></div>
+  <div class="holiday-layer" id="holidayLayer"></div>
   <div class="loading" id="loading">Loading St. Bonifacius Weather…</div>
 
   <main class="weather-app">
     <header class="topbar">
-      <div>
-        <h1 class="brand-title">Grumpy’s Weather Center</h1>
-        <div class="location">St. Bonifacius, MN 55375</div>
+      <div class="logo-lockup">
+        <img class="grumpys-logo" src="grumpys-logo.png" alt="Grumpy’s logo" />
+        <div>
+          <h1 class="brand-title">Grumpy’s Weather Center</h1>
+          <div class="location">St. Bonifacius, MN 55375</div>
+        </div>
       </div>
       <div>
         <div class="clock" id="clock">--:--</div>
@@ -463,14 +360,22 @@
     </header>
 
     <section class="main-grid">
+      <div class="alert-banner" id="alertBanner">
+        <div>
+          <div class="alert-title" id="alertTitle">Weather Alert</div>
+          <div class="alert-detail" id="alertDetail">No active alert details</div>
+        </div>
+        <div class="alert-badge" id="alertBadge">Alert</div>
+      </div>
       <article class="glass-card current-card">
         <div>
           <div class="condition-row">
             <div class="temp" id="currentTemp">--°</div>
-            <div class="condition-icon" id="currentIcon">☀️</div>
+            <div class="weather-visual" id="weatherVisual" aria-label="Animated current weather"></div>
           </div>
           <div class="condition-text" id="conditionText">Loading weather</div>
           <div class="feels-like" id="feelsLike">Feels like --°</div>
+          <div class="summary-line" id="summaryLine">Loading local forecast…</div>
         </div>
 
         <div class="stat-grid">
@@ -508,7 +413,7 @@
 
     <footer class="footer">
       <div class="status-pill" id="lastUpdated">Updated --</div>
-      <div class="status-pill">Auto-refreshes every 10 minutes</div>
+      
     </footer>
   </main>
 
@@ -528,7 +433,8 @@
       clock: document.getElementById("clock"),
       dateText: document.getElementById("dateText"),
       currentTemp: document.getElementById("currentTemp"),
-      currentIcon: document.getElementById("currentIcon"),
+      weatherVisual: document.getElementById("weatherVisual"),
+      summaryLine: document.getElementById("summaryLine"),
       conditionText: document.getElementById("conditionText"),
       feelsLike: document.getElementById("feelsLike"),
       highLow: document.getElementById("highLow"),
@@ -537,7 +443,11 @@
       sunsetTime: document.getElementById("sunsetTime"),
       hourlyRow: document.getElementById("hourlyRow"),
       dailyList: document.getElementById("dailyList"),
-      lastUpdated: document.getElementById("lastUpdated")
+      lastUpdated: document.getElementById("lastUpdated"),
+      alertBanner: document.getElementById("alertBanner"),
+      alertTitle: document.getElementById("alertTitle"),
+      alertDetail: document.getElementById("alertDetail"),
+      alertBadge: document.getElementById("alertBadge")
     };
 
     let latestWeather = null;
@@ -726,6 +636,56 @@
       else setPrecipitation(null);
     }
 
+    function renderWeatherVisual(code, isDay) {
+      const rainy = isRainCode(code);
+      const snowy = isSnowCode(code);
+      const cloudy = isCloudyCode(code);
+      const holiday = getHolidayEffect();
+      let html = "";
+
+      if (isDay === 1 && !rainy && !snowy) html += '<div class="mini-sun"></div>';
+      if (isDay !== 1 && !rainy && !snowy) html += '<div class="mini-moon"></div>';
+      if (cloudy || rainy || snowy) html += '<div class="mini-cloud"></div>';
+      if (rainy) html += '<div class="mini-rain"></div>';
+      if (snowy) html += '<div class="mini-snow"></div>';
+      if (!html) html = isDay === 1 ? '<div class="mini-sun"></div>' : '<div class="mini-moon"></div>';
+      if (holiday === "fireworks") html += '<div class="firework" style="left:130px; top:42px; animation-delay:.2s"></div>';
+      els.weatherVisual.innerHTML = html;
+    }
+
+    function buildSummary(condition, daily) {
+      const high = round(daily.temperature_2m_max[0]);
+      const rain = round(daily.precipitation_probability_max[0] ?? 0);
+      if (rain >= 70) return `${condition} now • Rain likely today • High ${high}°`;
+      if (rain >= 35) return `${condition} now • Chance of rain • High ${high}°`;
+      return `${condition} now • High ${high}° today`;
+    }
+
+    function getHolidayEffect() {
+      const now = new Date();
+      const parts = new Intl.DateTimeFormat("en-US", { timeZone: TIMEZONE, month: "numeric", day: "numeric" }).formatToParts(now);
+      const month = Number(parts.find(p => p.type === "month").value);
+      const day = Number(parts.find(p => p.type === "day").value);
+      if (month === 7 && day === 4) return "fireworks";
+      return null;
+    }
+
+    function renderHolidayLayer() {
+      const effect = getHolidayEffect();
+      const layer = document.getElementById("holidayLayer");
+      if (!layer) return;
+      layer.innerHTML = "";
+      if (effect !== "fireworks") return;
+      for (let i = 0; i < 6; i++) {
+        const fw = document.createElement("div");
+        fw.className = "firework";
+        fw.style.left = (12 + Math.random() * 76) + "vw";
+        fw.style.top = (12 + Math.random() * 32) + "vh";
+        fw.style.animationDelay = (Math.random() * 2.8) + "s";
+        layer.appendChild(fw);
+      }
+    }
+
     function renderWeather(data) {
       latestWeather = data;
       const current = data.current;
@@ -734,9 +694,10 @@
       const [condition, icon] = weatherInfo(current.weather_code, current.is_day);
 
       els.currentTemp.textContent = `${round(current.temperature_2m)}°`;
-      els.currentIcon.textContent = icon;
+      renderWeatherVisual(current.weather_code, current.is_day);
       els.conditionText.textContent = condition;
       els.feelsLike.textContent = `Feels like ${round(current.apparent_temperature)}°`;
+      els.summaryLine.textContent = buildSummary(condition, daily);
       els.highLow.textContent = `${round(daily.temperature_2m_max[0])}° / ${round(daily.temperature_2m_min[0])}°`;
       els.precipChance.textContent = `${round(daily.precipitation_probability_max[0] ?? 0)}%`;
       els.windSpeed.textContent = `${round(current.wind_speed_10m)} mph`;
@@ -774,6 +735,39 @@
       els.lastUpdated.textContent = `Updated ${formatTime(new Date())}`;
       updateSky(data);
       els.loading.classList.add("hide");
+    }
+
+    async function loadAlerts() {
+      const url = `https://api.weather.gov/alerts/active?point=${LATITUDE},${LONGITUDE}`;
+
+      try {
+        const response = await fetch(url, {
+          cache: "no-store",
+          headers: {
+            "Accept": "application/geo+json"
+          }
+        });
+        if (!response.ok) throw new Error(`Alerts request failed: ${response.status}`);
+        const data = await response.json();
+        const alerts = data.features || [];
+
+        if (!alerts.length) {
+          els.alertBanner.classList.remove("show");
+          return;
+        }
+
+        const priority = ["Extreme", "Severe", "Moderate", "Minor", "Unknown"];
+        alerts.sort((a, b) => priority.indexOf(a.properties.severity || "Unknown") - priority.indexOf(b.properties.severity || "Unknown"));
+        const alert = alerts[0].properties;
+
+        els.alertTitle.textContent = alert.event || "Weather Alert";
+        els.alertDetail.textContent = alert.headline || alert.description || "Active weather alert for the St. Bonifacius area.";
+        els.alertBadge.textContent = alert.severity || "Alert";
+        els.alertBanner.classList.add("show");
+      } catch (error) {
+        console.warn("Weather alerts could not load", error);
+        els.alertBanner.classList.remove("show");
+      }
     }
 
     async function loadWeather() {
@@ -824,9 +818,13 @@
     }
 
     updateClock();
+    renderHolidayLayer();
     setInterval(updateClock, 1000);
     loadWeather();
+    loadAlerts();
     setInterval(loadWeather, REFRESH_MINUTES * 60 * 1000);
+    setInterval(loadAlerts, REFRESH_MINUTES * 60 * 1000);
   </script>
 </body>
 </html>
+
