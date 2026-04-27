@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>St. Bonifacius Weather Board</title>
+  <style>
+    :root {
+      --card-bg: rgba(10, 18, 30, 0.48);
+      --card-border: rgba(255, 255, 255, 0.22);
+      --text-main: #ffffff;
+      --text-soft: rgba(255, 255, 255, 0.78);
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text-main);
+      background: #0b1020;
+    }
+
+    body {
+      position: relative;
+    }
+
+    .sky {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      background: linear-gradient(180deg, #123a6f 0%, #69a9e8 52%, #f3c071 100%);
+      transition: background 2s ease, filter 2s ease;
+    }
+
+    .sky::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 100%, rgba(255,255,255,0.14), transparent 42%),
+        linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.28));
+      pointer-events: none;
+    }
+
+    .celestial {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: left 2s ease, top 2s ease, opacity 2s ease, box-shadow 2s ease, background 2s ease;
+      z-index: 1;
+    }
+
+    .sun {
+      background: radial-gradient(circle, #fff6a6 0%, #ffd45a 48%, #ff9f2e 100%);
+      box-shadow: 0 0 70px rgba(255, 217, 92, 0.85), 0 0 150px rgba(255, 178, 55, 0.45);
+    }
+
+    .moon {
+      background: radial-gradient(circle at 38% 38%, #ffffff 0%, #dfe9ff 45%, #8fa4d2 100%);
+      box-shadow: 0 0 50px rgba(210, 225, 255, 0.55), 0 0 120px rgba(151, 177, 240, 0.25);
+    }
+
+    .moon::after {
+      content: "";
+      position: absolute;
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      background: rgba(12, 22, 42, 0.55);
+      top: 7px;
+      left: 30px;
+    }
+
+    .clouds {
+      position: absolute;
+      inset: 0;
+      opacity: 0.35;
+      transition: opacity 1.5s ease;
+      pointer-events: none;
+    }
+
+    .cloud {
+      position: absolute;
+      width: 270px;
+      height: 72px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.54);
+      filter: blur(0.2px);
+      animation: cloudMove linear infinite;
+    }
+
+    .cloud::before,
+    .cloud::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      background: inherit;
+    }
+
+    .cloud::before {
+      width: 112px;
+      height: 112px;
+      left: 42px;
+      top: -52px;
+    }
+
+    .cloud::after {
+      width: 138px;
+      height: 138px;
+      left: 112px;
+      top: -72px;
+    }
+
+    .cloud.one { top: 120px; left: -320px; animation-duration: 95s; transform: scale(1.05); }
+    .cloud.two { top: 270px; left: -520px; animation-duration: 120s; transform: scale(0.78); opacity: 0.7; }
+    .cloud.three { top: 520px; left: -460px; animation-duration: 145s; transform: scale(1.25); opacity: 0.55; }
+
+    @keyframes cloudMove {
+      from { translate: -20vw 0; }
+      to { translate: 135vw 0; }
+    }
+
+    .precip-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .drop {
+      position: absolute;
+      top: -60px;
+      width: 2px;
+      height: 34px;
+      border-radius: 999px;
+      background: rgba(215, 235, 255, 0.72);
+      animation: rainFall linear infinite;
+      transform: rotate(12deg);
+    }
+
+    @keyframes rainFall {
+      to { transform: translateY(116vh) translateX(-90px) rotate(12deg); }
+    }
+
+    .flake {
+      position: absolute;
+      top: -40px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 12px rgba(255,255,255,0.38);
+      animation: snowFall linear infinite;
+    }
+
+    @keyframes snowFall {
+      to { transform: translateY(112vh) translateX(70px); }
+    }
+
+    .weather-app {
+      position: relative;
+      z-index: 5;
+      width: 100vw;
+      height: 100vh;
+      padding: 54px 64px 48px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 34px;
+      text-shadow: 0 3px 16px var(--shadow);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 40px;
+    }
+
+    .brand-title {
+      font-size: 58px;
+      line-height: 0.95;
+      font-weight: 900;
+      letter-spacing: -1.8px;
+      margin: 0;
+    }
+
+    .location {
+      margin-top: 10px;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-soft);
+      letter-spacing: 0.5px;
+    }
+
+    .clock {
+      text-align: right;
+      font-weight: 900;
+      font-size: 48px;
+      line-height: 1;
+    }
+
+    .date {
+      margin-top: 8px;
+      font-size: 22px;
+      color: var(--text-soft);
+      font-weight: 700;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 34px;
+      min-height: 0;
+    }
+
+    .glass-card {
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      border-radius: 34px;
+      box-shadow: 0 26px 80px rgba(0,0,0,0.28);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .current-card {
+      padding: 42px 46px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 0;
+    }
+
+    .condition-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .temp {
+      font-size: 178px;
+      line-height: 0.9;
+      font-weight: 950;
+      letter-spacing: -9px;
+    }
+
+    .condition-icon {
+      font-size: 130px;
+      filter: drop-shadow(0 12px 22px rgba(0,0,0,0.28));
+    }
+
+    .condition-text {
+      font-size: 48px;
+      font-weight: 900;
+      margin-top: 20px;
+      letter-spacing: -0.8px;
+    }
+
+    .feels-like {
+      font-size: 28px;
+      color: var(--text-soft);
+      font-weight: 800;
+      margin-top: 8px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 34px;
+    }
+
+    .stat {
+      background: rgba(255,255,255,0.13);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 24px;
+      padding: 20px 22px;
+    }
+
+    .stat-label {
+      font-size: 18px;
+      color: var(--text-soft);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+    }
+
+    .stat-value {
+      margin-top: 7px;
+      font-size: 34px;
+      font-weight: 950;
+    }
+
+    .side-stack {
+      display: grid;
+      grid-template-rows: 1fr 1.15fr;
+      gap: 34px;
+      min-height: 0;
+    }
+
+    .hourly-card,
+    .daily-card {
+      padding: 28px;
+      min-height: 0;
+    }
+
+    .section-title {
+      margin: 0 0 18px;
+      font-size: 27px;
+      font-weight: 950;
+      letter-spacing: -0.3px;
+    }
+
+    .hour-row {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .hour-box {
+      text-align: center;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 22px;
+      padding: 16px 8px 14px;
+      min-width: 0;
+    }
+
+    .hour-time {
+      font-size: 17px;
+      font-weight: 900;
+      color: var(--text-soft);
+    }
+
+    .hour-icon {
+      font-size: 34px;
+      margin: 8px 0 5px;
+    }
+
+    .hour-temp {
+      font-size: 30px;
+      font-weight: 950;
+    }
+
+    .daily-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .day-row {
+      display: grid;
+      grid-template-columns: 1.1fr 56px 1fr 70px;
+      align-items: center;
+      gap: 14px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 21px;
+      padding: 13px 18px;
+      font-weight: 900;
+    }
+
+    .day-name {
+      font-size: 22px;
+    }
+
+    .day-icon {
+      font-size: 31px;
+      text-align: center;
+    }
+
+    .day-range {
+      font-size: 24px;
+      text-align: right;
+    }
+
+    .day-pop {
+      text-align: right;
+      font-size: 19px;
+      color: var(--text-soft);
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      color: rgba(255,255,255,0.74);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .status-pill {
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.16);
+    }
+
+    .loading {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      background: #07101f;
+      color: white;
+      font-size: 36px;
+      font-weight: 900;
+      transition: opacity 0.6s ease;
+    }
+
+    .loading.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 1200px) {
+      .weather-app { padding: 34px; gap: 20px; }
+      .brand-title { font-size: 42px; }
+      .clock { font-size: 38px; }
+      .main-grid { grid-template-columns: 1fr; }
+      .temp { font-size: 122px; }
+      .condition-icon { font-size: 92px; }
+      .condition-text { font-size: 34px; }
+      .side-stack { grid-template-rows: auto auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sky" id="sky">
+    <div class="celestial sun" id="sun"></div>
+    <div class="celestial moon" id="moon"></div>
+    <div class="clouds" id="clouds">
+      <div class="cloud one"></div>
+      <div class="cloud two"></div>
+      <div class="cloud three"></div>
+    </div>
+  </div>
+
+  <div class="precip-layer" id="precipLayer"></div>
+  <div class="loading" id="loading">Loading St. Bonifacius Weather…</div>
+
+  <main class="weather-app">
+    <header class="topbar">
+      <div>
+        <h1 class="brand-title">Grumpy’s Weather Center</h1>
+        <div class="location">St. Bonifacius, MN 55375</div>
+      </div>
+      <div>
+        <div class="clock" id="clock">--:--</div>
+        <div class="date" id="dateText">---</div>
+      </div>
+    </header>
+
+    <section class="main-grid">
+      <article class="glass-card current-card">
+        <div>
+          <div class="condition-row">
+            <div class="temp" id="currentTemp">--°</div>
+            <div class="condition-icon" id="currentIcon">☀️</div>
+          </div>
+          <div class="condition-text" id="conditionText">Loading weather</div>
+          <div class="feels-like" id="feelsLike">Feels like --°</div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat">
+            <div class="stat-label">Today</div>
+            <div class="stat-value" id="highLow">--° / --°</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Precip Chance</div>
+            <div class="stat-value" id="precipChance">--%</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Wind</div>
+            <div class="stat-value" id="windSpeed">-- mph</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Sunset</div>
+            <div class="stat-value" id="sunsetTime">--:--</div>
+          </div>
+        </div>
+      </article>
+
+      <div class="side-stack">
+        <article class="glass-card hourly-card">
+          <h2 class="section-title">Next 6 Hours</h2>
+          <div class="hour-row" id="hourlyRow"></div>
+        </article>
+
+        <article class="glass-card daily-card">
+          <h2 class="section-title">5-Day Forecast</h2>
+          <div class="daily-list" id="dailyList"></div>
+        </article>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="status-pill" id="lastUpdated">Updated --</div>
+      <div class="status-pill">Auto-refreshes every 10 minutes</div>
+    </footer>
+  </main>
+
+  <script>
+    const LATITUDE = 44.9055;
+    const LONGITUDE = -93.7475;
+    const TIMEZONE = "America/Chicago";
+    const REFRESH_MINUTES = 10;
+
+    const els = {
+      sky: document.getElementById("sky"),
+      sun: document.getElementById("sun"),
+      moon: document.getElementById("moon"),
+      clouds: document.getElementById("clouds"),
+      precipLayer: document.getElementById("precipLayer"),
+      loading: document.getElementById("loading"),
+      clock: document.getElementById("clock"),
+      dateText: document.getElementById("dateText"),
+      currentTemp: document.getElementById("currentTemp"),
+      currentIcon: document.getElementById("currentIcon"),
+      conditionText: document.getElementById("conditionText"),
+      feelsLike: document.getElementById("feelsLike"),
+      highLow: document.getElementById("highLow"),
+      precipChance: document.getElementById("precipChance"),
+      windSpeed: document.getElementById("windSpeed"),
+      sunsetTime: document.getElementById("sunsetTime"),
+      hourlyRow: document.getElementById("hourlyRow"),
+      dailyList: document.getElementById("dailyList"),
+      lastUpdated: document.getElementById("lastUpdated")
+    };
+
+    let latestWeather = null;
+
+    function formatTime(date) {
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: TIMEZONE,
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(date);
+    }
+
+    function formatHour(date) {
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: TIMEZONE,
+        hour: "numeric"
+      }).format(date);
+    }
+
+    function formatDay(date) {
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: TIMEZONE,
+        weekday: "short"
+      }).format(date);
+    }
+
+    function updateClock() {
+      const now = new Date();
+      els.clock.textContent = new Intl.DateTimeFormat("en-US", {
+        timeZone: TIMEZONE,
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit"
+      }).format(now);
+
+      els.dateText.textContent = new Intl.DateTimeFormat("en-US", {
+        timeZone: TIMEZONE,
+        weekday: "long",
+        month: "long",
+        day: "numeric"
+      }).format(now);
+
+      if (latestWeather) updateSky(latestWeather);
+    }
+
+    function round(value) {
+      return Math.round(Number(value));
+    }
+
+    function weatherInfo(code, isDay = 1) {
+      const map = {
+        0: ["Clear Sky", isDay ? "☀️" : "🌙"],
+        1: ["Mainly Clear", isDay ? "🌤️" : "🌙"],
+        2: ["Partly Cloudy", isDay ? "⛅" : "☁️"],
+        3: ["Cloudy", "☁️"],
+        45: ["Foggy", "🌫️"],
+        48: ["Rime Fog", "🌫️"],
+        51: ["Light Drizzle", "🌦️"],
+        53: ["Drizzle", "🌦️"],
+        55: ["Heavy Drizzle", "🌧️"],
+        56: ["Freezing Drizzle", "🌧️"],
+        57: ["Freezing Drizzle", "🌧️"],
+        61: ["Light Rain", "🌧️"],
+        63: ["Rain", "🌧️"],
+        65: ["Heavy Rain", "🌧️"],
+        66: ["Freezing Rain", "🌧️"],
+        67: ["Freezing Rain", "🌧️"],
+        71: ["Light Snow", "🌨️"],
+        73: ["Snow", "🌨️"],
+        75: ["Heavy Snow", "❄️"],
+        77: ["Snow Grains", "❄️"],
+        80: ["Rain Showers", "🌦️"],
+        81: ["Rain Showers", "🌧️"],
+        82: ["Heavy Showers", "⛈️"],
+        85: ["Snow Showers", "🌨️"],
+        86: ["Heavy Snow Showers", "❄️"],
+        95: ["Thunderstorm", "⛈️"],
+        96: ["Thunderstorm with Hail", "⛈️"],
+        99: ["Thunderstorm with Hail", "⛈️"]
+      };
+      return map[code] || ["Weather", "🌤️"];
+    }
+
+    function isRainCode(code) {
+      return [51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(Number(code));
+    }
+
+    function isSnowCode(code) {
+      return [71,73,75,77,85,86].includes(Number(code));
+    }
+
+    function isCloudyCode(code) {
+      return [2,3,45,48,51,53,55,56,57,61,63,65,66,67,80,81,82,85,86,95,96,99].includes(Number(code));
+    }
+
+    function setPrecipitation(type, intensity = 60) {
+      els.precipLayer.innerHTML = "";
+      if (!type) return;
+
+      const count = type === "snow" ? 90 : intensity;
+      for (let i = 0; i < count; i++) {
+        const particle = document.createElement("div");
+        particle.className = type === "snow" ? "flake" : "drop";
+        particle.style.left = Math.random() * 100 + "vw";
+        particle.style.animationDelay = (-Math.random() * 8) + "s";
+        particle.style.animationDuration = type === "snow"
+          ? (7 + Math.random() * 8) + "s"
+          : (0.55 + Math.random() * 0.55) + "s";
+        particle.style.opacity = type === "snow"
+          ? (0.35 + Math.random() * 0.65)
+          : (0.32 + Math.random() * 0.48);
+        if (type === "snow") {
+          const size = 5 + Math.random() * 8;
+          particle.style.width = size + "px";
+          particle.style.height = size + "px";
+        }
+        els.precipLayer.appendChild(particle);
+      }
+    }
+
+    function getDayProgress(now, sunrise, sunset) {
+      const start = sunrise.getTime();
+      const end = sunset.getTime();
+      const current = now.getTime();
+      return Math.min(1, Math.max(0, (current - start) / (end - start)));
+    }
+
+    function getNightProgress(now, sunrise, sunset) {
+      const current = now.getTime();
+      if (current < sunrise.getTime()) return 0.78;
+      if (current > sunset.getTime()) return 0.25;
+      return 0;
+    }
+
+    function updateSky(data) {
+      const now = new Date();
+      const todaySunrise = new Date(data.daily.sunrise[0]);
+      const todaySunset = new Date(data.daily.sunset[0]);
+      const isDay = data.current.is_day === 1;
+      const code = data.current.weather_code;
+      const cloudy = isCloudyCode(code);
+      const raining = isRainCode(code);
+      const snowing = isSnowCode(code);
+
+      let background;
+      let filter = "brightness(1) saturate(1.08)";
+
+      if (isDay) {
+        const p = getDayProgress(now, todaySunrise, todaySunset);
+        const earlyLate = Math.abs(p - 0.5) * 2;
+        const sunWarmth = earlyLate > 0.66;
+        background = sunWarmth
+          ? "linear-gradient(180deg, #1b3f78 0%, #e79959 56%, #f6c982 100%)"
+          : "linear-gradient(180deg, #1467b3 0%, #62b8f6 55%, #d6efff 100%)";
+        if (cloudy) filter = "brightness(0.78) saturate(0.82)";
+        if (raining) filter = "brightness(0.56) saturate(0.72)";
+        if (snowing) filter = "brightness(0.86) saturate(0.65)";
+
+        const x = 9 + p * 82;
+        const y = 76 - Math.sin(p * Math.PI) * 56;
+        els.sun.style.left = x + "%";
+        els.sun.style.top = y + "%";
+        els.sun.style.opacity = raining ? 0.18 : cloudy ? 0.34 : 1;
+        els.moon.style.opacity = 0;
+      } else {
+        const p = getNightProgress(now, todaySunrise, todaySunset);
+        background = "linear-gradient(180deg, #050817 0%, #0e1e3e 60%, #182849 100%)";
+        if (cloudy) filter = "brightness(0.72) saturate(0.8)";
+        if (raining) filter = "brightness(0.45) saturate(0.7)";
+        if (snowing) filter = "brightness(0.68) saturate(0.65)";
+
+        const x = 9 + p * 82;
+        const y = 78 - Math.sin(p * Math.PI) * 50;
+        els.moon.style.left = x + "%";
+        els.moon.style.top = y + "%";
+        els.moon.style.opacity = raining ? 0.15 : cloudy ? 0.32 : 0.92;
+        els.sun.style.opacity = 0;
+      }
+
+      els.sky.style.background = background;
+      els.sky.style.filter = filter;
+      els.clouds.style.opacity = cloudy || raining || snowing ? 0.62 : 0.24;
+
+      if (raining) setPrecipitation("rain", code >= 63 ? 110 : 70);
+      else if (snowing) setPrecipitation("snow");
+      else setPrecipitation(null);
+    }
+
+    function renderWeather(data) {
+      latestWeather = data;
+      const current = data.current;
+      const daily = data.daily;
+      const hourly = data.hourly;
+      const [condition, icon] = weatherInfo(current.weather_code, current.is_day);
+
+      els.currentTemp.textContent = `${round(current.temperature_2m)}°`;
+      els.currentIcon.textContent = icon;
+      els.conditionText.textContent = condition;
+      els.feelsLike.textContent = `Feels like ${round(current.apparent_temperature)}°`;
+      els.highLow.textContent = `${round(daily.temperature_2m_max[0])}° / ${round(daily.temperature_2m_min[0])}°`;
+      els.precipChance.textContent = `${round(daily.precipitation_probability_max[0] ?? 0)}%`;
+      els.windSpeed.textContent = `${round(current.wind_speed_10m)} mph`;
+      els.sunsetTime.textContent = formatTime(new Date(daily.sunset[0]));
+
+      const now = new Date();
+      const startIndex = hourly.time.findIndex(t => new Date(t) >= now);
+      const safeStart = Math.max(0, startIndex);
+      const nextSix = hourly.time.slice(safeStart, safeStart + 6);
+
+      els.hourlyRow.innerHTML = nextSix.map((time, i) => {
+        const idx = safeStart + i;
+        const [label, hourIcon] = weatherInfo(hourly.weather_code[idx], 1);
+        return `
+          <div class="hour-box" title="${label}">
+            <div class="hour-time">${formatHour(new Date(time))}</div>
+            <div class="hour-icon">${hourIcon}</div>
+            <div class="hour-temp">${round(hourly.temperature_2m[idx])}°</div>
+          </div>
+        `;
+      }).join("");
+
+      els.dailyList.innerHTML = daily.time.slice(0, 5).map((dateText, i) => {
+        const [label, dayIcon] = weatherInfo(daily.weather_code[i], 1);
+        return `
+          <div class="day-row" title="${label}">
+            <div class="day-name">${i === 0 ? "Today" : formatDay(new Date(dateText + "T12:00:00"))}</div>
+            <div class="day-icon">${dayIcon}</div>
+            <div class="day-range">${round(daily.temperature_2m_max[i])}° / ${round(daily.temperature_2m_min[i])}°</div>
+            <div class="day-pop">${round(daily.precipitation_probability_max[i] ?? 0)}%</div>
+          </div>
+        `;
+      }).join("");
+
+      els.lastUpdated.textContent = `Updated ${formatTime(new Date())}`;
+      updateSky(data);
+      els.loading.classList.add("hide");
+    }
+
+    async function loadWeather() {
+      const params = new URLSearchParams({
+        latitude: LATITUDE,
+        longitude: LONGITUDE,
+        current: [
+          "temperature_2m",
+          "apparent_temperature",
+          "is_day",
+          "precipitation",
+          "rain",
+          "snowfall",
+          "weather_code",
+          "wind_speed_10m"
+        ].join(","),
+        hourly: [
+          "temperature_2m",
+          "precipitation_probability",
+          "weather_code"
+        ].join(","),
+        daily: [
+          "weather_code",
+          "temperature_2m_max",
+          "temperature_2m_min",
+          "precipitation_probability_max",
+          "sunrise",
+          "sunset"
+        ].join(","),
+        temperature_unit: "fahrenheit",
+        wind_speed_unit: "mph",
+        precipitation_unit: "inch",
+        timezone: TIMEZONE,
+        forecast_days: "7"
+      });
+
+      const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+
+      try {
+        const response = await fetch(url, { cache: "no-store" });
+        if (!response.ok) throw new Error(`Weather request failed: ${response.status}`);
+        const data = await response.json();
+        renderWeather(data);
+      } catch (error) {
+        console.error(error);
+        els.loading.textContent = "Weather could not load. Check internet connection.";
+      }
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+    loadWeather();
+    setInterval(loadWeather, REFRESH_MINUTES * 60 * 1000);
+  </script>
+</body>
+</html>
