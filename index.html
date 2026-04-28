@@ -47,8 +47,8 @@
 
     .celestial {
       position: absolute;
-      width: 124px;
-      height: 124px;
+      width: 170px;
+      height: 170px;
       border-radius: 50%;
       transform: translate(-50%, -50%);
       transition: left 2s ease, top 2s ease, opacity 2s ease, box-shadow 2s ease, background 2s ease;
@@ -56,24 +56,61 @@
     }
 
     .sun {
-      background: radial-gradient(circle, #fff8b5 0%, #ffd85c 48%, #ff9f2e 100%);
-      box-shadow: 0 0 70px rgba(255, 217, 92, 0.82), 0 0 150px rgba(255, 178, 55, 0.42);
+      background: radial-gradient(circle, #fffce1 0%, #fff2a0 24%, #ffd85c 52%, #ff9f2e 100%);
+      box-shadow: 0 0 95px rgba(255, 232, 120, 0.98), 0 0 210px rgba(255, 178, 55, 0.68), 0 0 330px rgba(255, 215, 90, 0.28);
+      animation: celestialGlow 4s ease-in-out infinite;
+    }
+
+    .sun::before {
+      content: "";
+      position: absolute;
+      inset: -42px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 236, 150, 0.22);
+      box-shadow: 0 0 45px rgba(255, 228, 125, 0.22);
+    }
+
+    .sun::after {
+      content: "";
+      position: absolute;
+      inset: -86px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 230, 115, 0.24), transparent 64%);
     }
 
     .moon {
-      background: radial-gradient(circle at 38% 38%, #ffffff 0%, #dfe9ff 45%, #8fa4d2 100%);
-      box-shadow: 0 0 50px rgba(210, 225, 255, 0.55), 0 0 120px rgba(151, 177, 240, 0.25);
+      background: radial-gradient(circle at 38% 38%, #ffffff 0%, #edf4ff 42%, #a6b9e8 100%);
+      box-shadow: 0 0 82px rgba(225, 236, 255, 0.82), 0 0 190px rgba(151, 177, 240, 0.42), 0 0 300px rgba(190, 210, 255, 0.22);
+      animation: celestialGlow 4s ease-in-out infinite;
     }
 
     .moon::after {
       content: "";
       position: absolute;
-      width: 92px;
-      height: 92px;
+      width: 122px;
+      height: 122px;
       border-radius: 50%;
       background: rgba(12, 22, 42, 0.55);
-      top: 7px;
-      left: 30px;
+      top: 10px;
+      left: 42px;
+    }
+
+    @keyframes celestialGlow {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.045); }
+    }
+
+    .path-guide {
+      position: absolute;
+      left: 7%;
+      right: 7%;
+      top: 18%;
+      height: 62%;
+      border-top: 2px dashed rgba(255,255,255,0.16);
+      border-radius: 50% 50% 0 0;
+      opacity: 0.48;
+      z-index: 0;
+      pointer-events: none;
     }
 
     .clouds {
@@ -331,6 +368,7 @@
 </head>
 <body>
   <div class="sky" id="sky">
+    <div class="path-guide" id="pathGuide"></div>
     <div class="celestial sun" id="sun"></div>
     <div class="celestial moon" id="moon"></div>
     <div class="clouds" id="clouds">
@@ -610,7 +648,7 @@
         const y = 76 - Math.sin(p * Math.PI) * 56;
         els.sun.style.left = x + "%";
         els.sun.style.top = y + "%";
-        els.sun.style.opacity = raining ? 0.18 : cloudy ? 0.34 : 1;
+        els.sun.style.opacity = raining ? 0.44 : cloudy ? 0.62 : 1;
         els.moon.style.opacity = 0;
       } else {
         const p = getNightProgress(now, todaySunrise, todaySunset);
@@ -623,13 +661,13 @@
         const y = 78 - Math.sin(p * Math.PI) * 50;
         els.moon.style.left = x + "%";
         els.moon.style.top = y + "%";
-        els.moon.style.opacity = raining ? 0.15 : cloudy ? 0.32 : 0.92;
+        els.moon.style.opacity = raining ? 0.46 : cloudy ? 0.66 : 0.96;
         els.sun.style.opacity = 0;
       }
 
       els.sky.style.background = background;
       els.sky.style.filter = filter;
-      els.clouds.style.opacity = cloudy || raining || snowing ? 0.62 : 0.24;
+      els.clouds.style.opacity = cloudy || raining || snowing ? 0.50 : 0.24;
 
       if (raining) setPrecipitation("rain", code >= 63 ? 110 : 70);
       else if (snowing) setPrecipitation("snow");
