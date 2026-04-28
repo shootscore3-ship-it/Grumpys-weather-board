@@ -144,6 +144,8 @@
     .cloud.one { top: 120px; left: -320px; animation-duration: 95s; transform: scale(1.05); }
     .cloud.two { top: 260px; left: -520px; animation-duration: 120s; transform: scale(0.78); opacity: 0.7; }
     .cloud.three { top: 500px; left: -460px; animation-duration: 145s; transform: scale(1.18); opacity: 0.5; }
+    .cloud.four { top: 185px; left: -760px; animation-duration: 135s; transform: scale(0.92); opacity: 0.62; }
+    .cloud.five { top: 610px; left: -680px; animation-duration: 165s; transform: scale(0.88); opacity: 0.48; }
 
     @keyframes cloudMove { from { translate: -20vw 0; } to { translate: 135vw 0; } }
 
@@ -301,26 +303,26 @@
     .temp { font-size: 156px; line-height: 0.9; font-weight: 950; letter-spacing: -8px; }
 
     .weather-visual {
-      width: 230px;
-      height: 230px;
+      width: 290px;
+      height: 290px;
       position: relative;
       flex: 0 0 auto;
       filter: drop-shadow(0 14px 26px rgba(0,0,0,0.32));
     }
 
     .mini-sun, .mini-moon, .mini-cloud, .mini-rain, .mini-snow { position: absolute; }
-    .mini-sun { width: 108px; height: 108px; border-radius: 50%; background: #ffd85c; left: 46px; top: 28px; box-shadow: 0 0 40px rgba(255,216,92,0.8); animation: pulseSun 3s ease-in-out infinite; }
+    .mini-sun { width: 138px; height: 138px; border-radius: 50%; background: #ffd85c; left: 58px; top: 34px; box-shadow: 0 0 40px rgba(255,216,92,0.8); animation: pulseSun 3s ease-in-out infinite; }
     @keyframes pulseSun { 50% { transform: scale(1.06); } }
-    .mini-moon { width: 104px; height: 104px; border-radius: 50%; background: #e8f0ff; left: 50px; top: 30px; box-shadow: 0 0 30px rgba(210,225,255,0.6); }
-    .mini-moon::after { content:""; position:absolute; width:84px; height:84px; border-radius:50%; background:rgba(18,32,58,0.62); left:32px; top:5px; }
-    .mini-cloud { width: 170px; height: 60px; border-radius: 999px; background: rgba(255,255,255,0.92); left: 22px; top: 100px; animation: cloudBob 3.5s ease-in-out infinite; }
+    .mini-moon { width: 132px; height: 132px; border-radius: 50%; background: #e8f0ff; left: 62px; top: 36px; box-shadow: 0 0 30px rgba(210,225,255,0.6); }
+    .mini-moon::after { content:""; position:absolute; width:106px; height:106px; border-radius:50%; background:rgba(18,32,58,0.62); left:40px; top:7px; }
+    .mini-cloud { width: 220px; height: 76px; border-radius: 999px; background: rgba(255,255,255,0.92); left: 26px; top: 124px; animation: cloudBob 3.5s ease-in-out infinite; }
     .mini-cloud::before, .mini-cloud::after { content:""; position:absolute; border-radius:50%; background:inherit; }
-    .mini-cloud::before { width:78px; height:78px; left:30px; top:-39px; }
-    .mini-cloud::after { width:94px; height:94px; left:80px; top:-54px; }
+    .mini-cloud::before { width:102px; height:102px; left:38px; top:-52px; }
+    .mini-cloud::after { width:122px; height:122px; left:104px; top:-70px; }
     @keyframes cloudBob { 50% { transform: translateY(-7px); } }
-    .mini-rain { left: 62px; top: 158px; width: 9px; height: 42px; border-radius: 999px; background:#cfeaff; box-shadow: 40px 4px 0 #cfeaff, 80px -2px 0 #cfeaff; animation: miniRain 0.8s linear infinite; }
+    .mini-rain { left: 76px; top: 198px; width: 10px; height: 52px; border-radius: 999px; background:#cfeaff; box-shadow: 52px 4px 0 #cfeaff, 104px -2px 0 #cfeaff; animation: miniRain 0.8s linear infinite; }
     @keyframes miniRain { to { transform: translateY(18px); opacity: 0.2; } }
-    .mini-snow { left: 58px; top: 160px; width: 13px; height: 13px; border-radius:50%; background:white; box-shadow: 42px 8px 0 white, 86px 1px 0 white, 22px 42px 0 white, 70px 46px 0 white; animation: miniSnow 2s linear infinite; }
+    .mini-snow { left: 72px; top: 202px; width: 15px; height: 15px; border-radius:50%; background:white; box-shadow: 54px 10px 0 white, 108px 2px 0 white, 28px 52px 0 white, 88px 56px 0 white; animation: miniSnow 2s linear infinite; }
     @keyframes miniSnow { to { transform: translateY(20px); opacity: 0.25; } }
 
     .condition-text { font-size: 44px; font-weight: 950; letter-spacing: -0.7px; }
@@ -375,6 +377,8 @@
       <div class="cloud one"></div>
       <div class="cloud two"></div>
       <div class="cloud three"></div>
+      <div class="cloud four"></div>
+      <div class="cloud five"></div>
     </div>
   </div>
 
@@ -667,7 +671,7 @@
 
       els.sky.style.background = background;
       els.sky.style.filter = filter;
-      els.clouds.style.opacity = cloudy || raining || snowing ? 0.50 : 0.24;
+      els.clouds.style.opacity = cloudy || raining || snowing ? 0.68 : 0.30;
 
       if (raining) setPrecipitation("rain", code >= 63 ? 110 : 70);
       else if (snowing) setPrecipitation("snow");
@@ -703,7 +707,7 @@
       if (rainy) html += '<div class="mini-rain"></div>';
       if (snowy) html += '<div class="mini-snow"></div>';
       if (!html) html = isDay === 1 ? '<div class="mini-sun"></div>' : '<div class="mini-moon"></div>';
-      if (holiday === "fireworks") html += '<div class="firework" style="left:160px; top:58px; animation-delay:.2s"></div>';
+      if (holiday === "fireworks") html += '<div class="firework" style="left:205px; top:72px; animation-delay:.2s"></div>';
       if (holiday === "newyear") html += '<div class="holiday-badge" style="position:absolute; right:0; top:8px; font-size:42px; filter:drop-shadow(0 8px 12px rgba(0,0,0,.35));">🎆</div>';
       if (holiday === "valentine") html += '<div class="holiday-badge" style="position:absolute; right:4px; top:10px; font-size:44px; filter:drop-shadow(0 8px 12px rgba(0,0,0,.35));">❤️</div>';
       if (holiday === "stpatricks") html += '<div class="holiday-badge" style="position:absolute; right:2px; top:12px; font-size:46px; filter:drop-shadow(0 8px 12px rgba(0,0,0,.35));">☘️</div>';
