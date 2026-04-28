@@ -636,6 +636,22 @@
       else setPrecipitation(null);
     }
 
+    function isDayAt(date, data) {
+      const targetDate = new Intl.DateTimeFormat("en-CA", {
+        timeZone: TIMEZONE,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).format(date);
+
+      const index = data.daily.time.findIndex(day => day === targetDate);
+      if (index === -1) return 1;
+
+      const sunrise = new Date(data.daily.sunrise[index]);
+      const sunset = new Date(data.daily.sunset[index]);
+      return date >= sunrise && date < sunset ? 1 : 0;
+    }
+
     function renderWeatherVisual(code, isDay) {
       const rainy = isRainCode(code);
       const snowy = isSnowCode(code);
@@ -722,10 +738,12 @@
 
       els.hourlyRow.innerHTML = nextSix.map((time, i) => {
         const idx = safeStart + i;
-        const [label, hourIcon] = weatherInfo(hourly.weather_code[idx], 1);
+        const hourDate = new Date(time);
+        const hourIsDay = isDayAt(hourDate, data);
+        const [label, hourIcon] = weatherInfo(hourly.weather_code[idx], hourIsDay);
         return `
           <div class="hour-box" title="${label}">
-            <div class="hour-time">${formatHour(new Date(time))}</div>
+            <div class="hour-time">${formatHour(hourDate)}</div>
             <div class="hour-icon">${hourIcon}</div>
             <div class="hour-temp">${round(hourly.temperature_2m[idx])}°</div>
           </div>
