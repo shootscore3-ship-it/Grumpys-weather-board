@@ -268,15 +268,56 @@
     }
 
     .alert-banner.show {
-      display: flex;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
       align-items: center;
-      justify-content: space-between;
-      gap: 22px;
+      gap: 24px;
     }
 
-    .alert-title { font-size: 25px; font-weight: 950; letter-spacing: -0.3px; line-height: 1; }
-    .alert-detail { margin-top: 5px; font-size: 16px; font-weight: 800; color: rgba(255,255,255,0.84); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 1320px; line-height: 1.12; }
-    .alert-badge { flex: 0 0 auto; padding: 10px 16px; border-radius: 999px; background: rgba(255,255,255,0.18); font-size: 16px; font-weight: 950; text-transform: uppercase; letter-spacing: 1px; }
+    .alert-title {
+      font-size: 34px;
+      font-weight: 950;
+      letter-spacing: -0.5px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .alert-marquee {
+      overflow: hidden;
+      min-width: 0;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%);
+    }
+
+    .alert-detail {
+      font-size: 22px;
+      font-weight: 850;
+      color: rgba(255,255,255,0.88);
+      white-space: nowrap;
+      line-height: 1;
+      padding-left: 100%;
+      animation: alertScroll 26s linear infinite;
+    }
+
+    @keyframes alertScroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-100%); }
+    }
+
+    .alert-badge {
+      flex: 0 0 auto;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+      font-size: 16px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
 
     .main-grid {
       display: grid;
@@ -408,8 +449,8 @@
 
     <section class="main-grid">
       <div class="alert-banner" id="alertBanner">
-        <div>
-          <div class="alert-title" id="alertTitle">Weather Alert</div>
+        <div class="alert-title" id="alertTitle">Weather Alert</div>
+        <div class="alert-marquee">
           <div class="alert-detail" id="alertDetail">No active alert details</div>
         </div>
         <div class="alert-badge" id="alertBadge">Alert</div>
