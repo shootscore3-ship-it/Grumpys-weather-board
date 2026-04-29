@@ -253,14 +253,18 @@
 
     .alert-banner {
       display: none;
+      grid-column: 1 / -1;
       border: 2px solid rgba(255,255,255,0.45);
-      background: rgba(135, 18, 24, 0.80);
-      border-radius: 24px;
-      padding: 14px 22px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.26);
+      background: rgba(135, 18, 24, 0.84);
+      border-radius: 22px;
+      padding: 12px 20px;
+      box-shadow: 0 16px 44px rgba(0,0,0,0.24);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      min-height: 78px;
+      height: 74px;
+      min-height: 74px;
+      max-height: 74px;
+      overflow: hidden;
     }
 
     .alert-banner.show {
@@ -270,14 +274,15 @@
       gap: 22px;
     }
 
-    .alert-title { font-size: 28px; font-weight: 950; letter-spacing: -0.3px; }
-    .alert-detail { margin-top: 4px; font-size: 17px; font-weight: 800; color: rgba(255,255,255,0.84); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 1220px; }
-    .alert-badge { flex: 0 0 auto; padding: 11px 17px; border-radius: 999px; background: rgba(255,255,255,0.18); font-size: 17px; font-weight: 950; text-transform: uppercase; letter-spacing: 1px; }
+    .alert-title { font-size: 25px; font-weight: 950; letter-spacing: -0.3px; line-height: 1; }
+    .alert-detail { margin-top: 5px; font-size: 16px; font-weight: 800; color: rgba(255,255,255,0.84); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 1320px; line-height: 1.12; }
+    .alert-badge { flex: 0 0 auto; padding: 10px 16px; border-radius: 999px; background: rgba(255,255,255,0.18); font-size: 16px; font-weight: 950; text-transform: uppercase; letter-spacing: 1px; }
 
     .main-grid {
       display: grid;
       grid-template-columns: 1.05fr 1fr;
-      gap: 30px;
+      grid-template-rows: auto 1fr;
+      gap: 24px 30px;
       min-height: 0;
     }
 
