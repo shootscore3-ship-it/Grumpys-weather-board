@@ -402,15 +402,60 @@
     .loading { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: #07101f; color: white; font-size: 36px; font-weight: 900; transition: opacity 0.6s ease; }
     .loading.hide { opacity: 0; pointer-events: none; }
 
-    @media (max-width: 1200px) {
-      .weather-app { padding: 30px; gap: 18px; }
-      .brand-title { font-size: 38px; }
-      .clock { font-size: 34px; }
-      .main-grid { grid-template-columns: 1fr; }
-      .temp { font-size: 118px; }
-      .weather-visual { width: 138px; height: 138px; }
-      .condition-text { font-size: 34px; }
-      .side-stack { grid-template-rows: auto auto; }
+    .weather-app { width:1920px; height:1080px; padding:32px 48px 24px;
+      grid-template-rows:auto minmax(0,1fr) auto; gap:20px; transform-origin:top left; }
+    .main-grid { grid-template-rows:minmax(0,1fr); }
+    .main-grid.has-alert { grid-template-rows:74px minmax(0,1fr); }
+    .current-card { gap:12px; padding:28px 36px; }
+    .weather-visual { height:260px; }
+    .stat-grid { margin-top:8px; }
+    .stat { padding:18px 22px; }
+    .footer { min-height:32px; }
+    .status-pill { padding:7px 14px; }
+    .radar-card { display:none; min-width:0; min-height:0; overflow:hidden; padding:20px;
+      grid-template-rows:auto minmax(0,1fr) auto; gap:10px; background:rgba(6,17,29,.88); }
+    .radar-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; }
+    .radar-heading h2 { font-size:28px; margin:0; }
+    .radar-reason { font-size:20px; font-weight:800; color:#ffdf93; text-align:right; }
+    .radar-stage { position:relative; min-height:0; overflow:hidden; border-radius:16px; background:#0b1423; }
+    .radar-image { display:block; width:100%; height:100%; object-fit:contain; }
+    .radar-image[hidden] { display:none; }
+    .radar-message { position:absolute; inset:0; display:grid; place-items:center; padding:30px;
+      text-align:center; font-size:24px; background:#0b1423; }
+    .radar-message[hidden] { display:none; }
+    .radar-caption { display:flex; align-items:center; justify-content:space-between; gap:16px;
+      font-size:16px; color:var(--text-soft); text-shadow:none; }
+    .radar-caption a { color:inherit; }
+    .storm-mode .main-grid { grid-template-columns:1.35fr 1fr; grid-template-rows:minmax(0,1fr) 162px; gap:20px; }
+    .storm-mode .main-grid.has-alert { grid-template-rows:74px minmax(0,1fr) 162px; }
+    .storm-mode .radar-card { display:grid; grid-column:1; }
+    .storm-mode .current-card { grid-column:2; padding:22px 30px; gap:8px; }
+    .storm-mode .side-stack { display:contents; }
+    .storm-mode .daily-card { display:none; }
+    .storm-mode .hourly-card { grid-column:1 / -1; padding:16px 22px; display:grid;
+      grid-template-columns:155px 1fr; align-items:center; gap:24px; }
+    .storm-mode .hourly-card .section-title { margin:0; font-size:28px; line-height:1.15; }
+    .storm-mode .hour-row { gap:18px; }
+    .storm-mode .hour-box { padding:10px 12px; display:grid; grid-template-columns:1fr 1fr; align-items:center; }
+    .storm-mode .hour-time { grid-column:1 / -1; font-size:21px; }
+    .storm-mode .hour-icon { font-size:36px; margin:5px 0 0; }
+    .storm-mode .hour-temp { font-size:34px; }
+    .storm-mode .temp { font-size:128px; }
+    .storm-mode .weather-visual { width:190px; height:170px; }
+    .storm-mode .weather-visual > * { zoom:.64; }
+    .storm-mode .condition-text { font-size:38px; line-height:1.1; }
+    .storm-mode .feels-like { font-size:24px; }
+    .storm-mode .summary-line { font-size:22px; margin-top:8px; }
+    .storm-mode .stat-grid { gap:12px; margin-top:6px; }
+    .storm-mode .stat { padding:12px 18px; border-radius:18px; }
+    .storm-mode .stat-value { margin-top:5px; font-size:32px; }
+    .storm-mode .stat-label { font-size:17px; }
+    .storm-mode .current-card { animation:conditionsSlide .65s ease-out; }
+    .storm-mode .radar-card { animation:radarAppear .65s ease-out; }
+    @keyframes conditionsSlide { from { transform:translateX(-80px); opacity:.45; } to { transform:none; opacity:1; } }
+    @keyframes radarAppear { from { opacity:0; transform:translateX(-25px); } to { opacity:1; transform:none; } }
+    @media (prefers-reduced-motion:reduce) {
+      .storm-mode .current-card, .storm-mode .radar-card { animation:none; }
     }
   </style>
 </head>
@@ -455,6 +500,20 @@
         </div>
         <div class="alert-badge" id="alertBadge">Alert</div>
       </div>
+      <article class="glass-card radar-card" aria-label="Twin Cities weather radar">
+        <div class="radar-heading">
+          <h2>Twin Cities Radar</h2>
+          <div class="radar-reason" id="radarReason"></div>
+        </div>
+        <div class="radar-stage">
+          <img class="radar-image" id="radarImage" alt="Animated National Weather Service Twin Cities radar, with radar timestamps and intensity legend" hidden />
+          <div class="radar-message" id="radarMessage" role="status">Loading radar…</div>
+        </div>
+        <div class="radar-caption">
+          <a href="https://radar.weather.gov/" target="_blank" rel="noopener">NOAA / National Weather Service • KMPX</a>
+          <span id="radarStatus">Recent radar • Times shown on map</span>
+        </div>
+      </article>
       <article class="glass-card current-card">
         <div>
           <div class="condition-row">
@@ -539,6 +598,162 @@
     };
 
     let latestWeather = null;
+    let weatherReceivedAt = 0;
+    let activeAlerts = [];
+    let alertsReceivedAt = 0;
+    let stormVisible = false;
+    let lastStormAt = 0;
+    let radarTimer = null;
+    let radarGeneration = 0;
+    let lastPrecipitation = "";
+    const DEMO_MODE = new URLSearchParams(location.search).get("demo");
+    const IS_DEMO = ["storm", "snow", "clear"].includes(DEMO_MODE);
+    const RADAR_URL = "https://radar.weather.gov/ridge/standard/KMPX_loop.gif";
+    const STORM_CODES = new Set([56,57,65,66,67,71,73,75,77,82,85,86,95,96,99]);
+    const RADAR_EVENTS = /^(Tornado|Severe Thunderstorm|Winter Storm|Blizzard|Snow Squall|Ice Storm|Winter Weather|Flash Flood|Flood) (Warning|Watch|Advisory)$/i;
+
+    function fitBoard() {
+      const scale = Math.min(innerWidth / 1920, innerHeight / 1080);
+      const app = document.querySelector(".weather-app");
+      app.style.transform = `scale(${scale})`;
+      app.style.left = `${(innerWidth - 1920 * scale) / 2}px`;
+      app.style.top = `${(innerHeight - 1080 * scale) / 2}px`;
+    }
+
+    // Open-Meteo returns local ISO timestamps without an offset. Attach its supplied
+    // UTC offset so forecast triggers still work if a VXT player uses another timezone.
+    function normalizeWeatherTimes(data) {
+      const minutes = Math.round((data.utc_offset_seconds || 0) / 60);
+      const offset = `${minutes < 0 ? "-" : "+"}${String(Math.floor(Math.abs(minutes)/60)).padStart(2,"0")}:${String(Math.abs(minutes)%60).padStart(2,"0")}`;
+      const withOffset = value => /(?:Z|[+-]\d{2}:\d{2})$/.test(value) ? value : value + offset;
+      data.hourly.time = data.hourly.time.map(withOffset);
+      data.daily.sunrise = data.daily.sunrise.map(withOffset);
+      data.daily.sunset = data.daily.sunset.map(withOffset);
+      if (data.current.time) data.current.time = withOffset(data.current.time);
+      return data;
+    }
+
+    function stormReason(data, alerts, now = Date.now()) {
+      const alert = alerts.find(feature => {
+        const p = feature.properties || {};
+        const end = Date.parse(p.ends || p.expires);
+        const start = Date.parse(p.effective || p.sent);
+        return p.status === "Actual" && p.messageType !== "Cancel" && RADAR_EVENTS.test(p.event || "") &&
+          Number.isFinite(end) && end > now && (!Number.isFinite(start) || start <= now);
+      });
+      if (alert) return alert.properties.event;
+      if (!data) return "";
+      const observed = Date.parse(data.current.time);
+      if (STORM_CODES.has(Number(data.current.weather_code)) && Number.isFinite(observed) &&
+          observed <= now + 5 * 60000 && observed > now - 30 * 60000) {
+        return weatherInfo(data.current.weather_code)[0] + " nearby";
+      }
+      const hourly = data.hourly;
+      const index = hourly.time.findIndex((time, i) => {
+        const start = Date.parse(time);
+        // Include the remainder of the current hourly forecast period.
+        return start + 3600000 > now && start <= now + 2 * 3600000 &&
+          STORM_CODES.has(Number(hourly.weather_code[i])) &&
+          Number(hourly.precipitation_probability[i]) >= 40;
+      });
+      return index < 0 ? "" : weatherInfo(hourly.weather_code[index])[0] + " • Within 2 hours";
+    }
+
+    function updateStormMode(now = Date.now()) {
+      const data = now - weatherReceivedAt <= 30 * 60000 ? latestWeather : null;
+      const alerts = now - alertsReceivedAt <= 30 * 60000 ? activeAlerts : [];
+      const reason = stormReason(data, alerts, now);
+      if (reason) lastStormAt = now;
+      // Hold for ten minutes after the final trigger to avoid layout flicker.
+      const show = !!reason || (stormVisible && now - lastStormAt < 10 * 60000);
+      document.getElementById("radarReason").textContent = reason || "Weather clearing • Recent radar";
+      if (show === stormVisible) return;
+      stormVisible = show;
+      document.querySelector(".weather-app").classList.toggle("storm-mode", show);
+      if (show) {
+        refreshRadar();
+        radarTimer = setInterval(refreshRadar, 2 * 60000);
+      } else {
+        clearInterval(radarTimer);
+        radarTimer = null;
+        radarGeneration++;
+        const image = document.getElementById("radarImage");
+        image.removeAttribute("src");
+        image.hidden = true;
+      }
+    }
+
+    function refreshRadar() {
+      if (!stormVisible) return;
+      const generation = ++radarGeneration;
+      const image = document.getElementById("radarImage");
+      const message = document.getElementById("radarMessage");
+      const status = document.getElementById("radarStatus");
+      const pending = new Image();
+      let finished = false;
+      const fail = () => {
+        if (finished || generation !== radarGeneration || !stormVisible) return;
+        finished = true;
+        clearTimeout(timeout);
+        image.hidden = true;
+        message.hidden = false;
+        message.textContent = "Radar temporarily unavailable. Retrying automatically…";
+        status.textContent = "Local forecast and alerts remain active";
+      };
+      const timeout = setTimeout(fail, 20000);
+      pending.onload = () => {
+        if (finished || generation !== radarGeneration || !stormVisible) return;
+        finished = true;
+        clearTimeout(timeout);
+        image.src = pending.src;
+        image.hidden = false;
+        message.hidden = true;
+        status.textContent = `Loaded ${formatTime(new Date())} • Radar times on map`;
+      };
+      pending.onerror = fail;
+      if (image.hidden) {
+        message.hidden = false;
+        message.textContent = "Loading radar…";
+      }
+      pending.src = `${RADAR_URL}?refresh=${Math.floor(Date.now() / 120000)}`;
+    }
+
+    function renderAlerts(now = Date.now()) {
+      activeAlerts = activeAlerts.filter(a => a.properties?.status === "Actual" &&
+        a.properties.messageType !== "Cancel" && Date.parse(a.properties.ends || a.properties.expires) > now);
+      const priority = ["Extreme", "Severe", "Moderate", "Minor", "Unknown"];
+      activeAlerts.sort((a,b) => priority.indexOf(a.properties.severity || "Unknown") - priority.indexOf(b.properties.severity || "Unknown"));
+      const alert = now - alertsReceivedAt <= 30 * 60000 ? activeAlerts[0]?.properties : null;
+      els.alertBanner.classList.toggle("show", !!alert);
+      document.querySelector(".main-grid").classList.toggle("has-alert", !!alert);
+      if (alert) {
+        els.alertTitle.textContent = alert.event || "Weather Alert";
+        els.alertDetail.textContent = alert.headline || alert.description || "Active local weather alert.";
+        els.alertBadge.textContent = alert.severity || "Alert";
+      }
+      updateStormMode(now);
+    }
+
+    function makeDemoWeather() {
+      const now = new Date();
+      const hour = Math.floor(now.getTime() / 3600000) * 3600000;
+      const code = DEMO_MODE === "snow" ? 75 : DEMO_MODE === "storm" ? 95 : 1;
+      const temp = DEMO_MODE === "snow" ? 28 : 74;
+      const days = Array.from({length:7}, (_,i) => new Date(hour + i * 86400000));
+      return {
+        current: {time:now.toISOString(), temperature_2m:temp, apparent_temperature:temp-3,
+          is_day:1, weather_code:DEMO_MODE === "clear" ? 1 : 3, wind_speed_10m:14},
+        hourly: {time:Array.from({length:48},(_,i)=>new Date(hour+i*3600000).toISOString()),
+          weather_code:Array(48).fill(code), precipitation_probability:Array(48).fill(code===1?5:85),
+          temperature_2m:Array.from({length:48},(_,i)=>temp-Math.min(i,8))},
+        daily: {time:days.map(d=>d.toISOString().slice(0,10)),
+          sunrise:days.map(d=>d.toISOString().slice(0,10)+"T06:45:00-05:00"),
+          sunset:days.map(d=>d.toISOString().slice(0,10)+"T19:40:00-05:00"),
+          weather_code:Array(7).fill(code), temperature_2m_max:Array(7).fill(temp+3),
+          temperature_2m_min:Array(7).fill(temp-12), precipitation_probability_max:Array(7).fill(code===1?5:85)}
+      };
+    }
+
 
     function formatTime(date) {
       return new Intl.DateTimeFormat("en-US", {
@@ -632,6 +847,9 @@
     }
 
     function setPrecipitation(type, intensity = 60) {
+      const key = `${type || "none"}:${intensity}`;
+      if (key === lastPrecipitation) return;
+      lastPrecipitation = key;
       els.precipLayer.innerHTML = "";
       if (!type) return;
 
@@ -766,8 +984,8 @@
     function buildSummary(condition, daily) {
       const high = round(daily.temperature_2m_max[0]);
       const rain = round(daily.precipitation_probability_max[0] ?? 0);
-      if (rain >= 70) return `${condition} now • Rain likely today • High ${high}°`;
-      if (rain >= 35) return `${condition} now • Chance of rain • High ${high}°`;
+      if (rain >= 70) return `${condition} now • Precipitation likely • High ${high}°`;
+      if (rain >= 35) return `${condition} now • Chance of precipitation • High ${high}°`;
       return `${condition} now • High ${high}° today`;
     }
 
@@ -804,6 +1022,7 @@
 
     function renderWeather(data) {
       latestWeather = data;
+      weatherReceivedAt = Date.now();
       const current = data.current;
       const daily = data.daily;
       const hourly = data.hourly;
@@ -853,39 +1072,30 @@
       els.lastUpdated.textContent = `Updated ${formatTime(new Date())}`;
       updateSky(data);
       els.loading.classList.add("hide");
+      updateStormMode();
+    }
+
+    async function fetchWithTimeout(url, options = {}) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 20000);
+      try { return await fetch(url, {...options, signal:controller.signal}); }
+      finally { clearTimeout(timer); }
     }
 
     async function loadAlerts() {
-      const url = `https://api.weather.gov/alerts/active?point=${LATITUDE},${LONGITUDE}`;
-
       try {
-        const response = await fetch(url, {
-          cache: "no-store",
-          headers: {
-            "Accept": "application/geo+json"
-          }
+        const response = await fetchWithTimeout(`https://api.weather.gov/alerts/active?point=${LATITUDE},${LONGITUDE}`, {
+          cache:"no-store", headers:{Accept:"application/geo+json"}
         });
         if (!response.ok) throw new Error(`Alerts request failed: ${response.status}`);
         const data = await response.json();
-        const alerts = data.features || [];
-
-        if (!alerts.length) {
-          els.alertBanner.classList.remove("show");
-          return;
-        }
-
-        const priority = ["Extreme", "Severe", "Moderate", "Minor", "Unknown"];
-        alerts.sort((a, b) => priority.indexOf(a.properties.severity || "Unknown") - priority.indexOf(b.properties.severity || "Unknown"));
-        const alert = alerts[0].properties;
-
-        els.alertTitle.textContent = alert.event || "Weather Alert";
-        els.alertDetail.textContent = alert.headline || alert.description || "Active weather alert for the St. Bonifacius area.";
-        els.alertBadge.textContent = alert.severity || "Alert";
-        els.alertBanner.classList.add("show");
+        if (!Array.isArray(data.features)) throw new Error("Invalid alerts response");
+        activeAlerts = data.features;
+        alertsReceivedAt = Date.now();
       } catch (error) {
         console.warn("Weather alerts could not load", error);
-        els.alertBanner.classList.remove("show");
       }
+      renderAlerts();
     }
 
     async function loadWeather() {
@@ -925,23 +1135,38 @@
       const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
 
       try {
-        const response = await fetch(url, { cache: "no-store" });
+        const response = await fetchWithTimeout(url, { cache: "no-store" });
         if (!response.ok) throw new Error(`Weather request failed: ${response.status}`);
         const data = await response.json();
-        renderWeather(data);
+        renderWeather(normalizeWeatherTimes(data));
       } catch (error) {
         console.error(error);
-        els.loading.textContent = "Weather could not load. Check internet connection.";
+        els.loading.textContent = "Weather could not load. Retrying automatically…";
+        if (latestWeather) els.lastUpdated.textContent = `Weather delayed • Last update ${formatTime(new Date(weatherReceivedAt))}`;
+        updateStormMode();
       }
     }
 
+    fitBoard();
+    addEventListener("resize", fitBoard);
     updateClock();
     renderHolidayLayer();
     setInterval(updateClock, 1000);
-    loadWeather();
-    loadAlerts();
-    setInterval(loadWeather, REFRESH_MINUTES * 60 * 1000);
-    setInterval(loadAlerts, REFRESH_MINUTES * 60 * 1000);
+    if (IS_DEMO) {
+      document.querySelector(".location").textContent = "DEMO • Sample forecast • Radar shows actual weather";
+      const runDemo = () => {
+        renderWeather(makeDemoWeather());
+        els.lastUpdated.textContent = "DEMO • Sample weather conditions";
+      };
+      runDemo();
+      setInterval(runDemo, 60000);
+    } else {
+      loadWeather();
+      loadAlerts();
+      setInterval(loadWeather, REFRESH_MINUTES * 60 * 1000);
+      setInterval(loadAlerts, 2 * 60 * 1000);
+    }
+    setInterval(renderAlerts, 60000);
   </script>
 </body>
 </html>
