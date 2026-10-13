@@ -1,18 +1,15 @@
-GRUMPY'S WEATHER BOARD — AUTOMATIC RADAR UPDATE
+GRUMPY'S WEATHER BOARD
 
-Upload index.html to the root of your existing Grumpys-weather-board GitHub repository, replacing the existing index.html. Keep grumpys-logo.png beside it. The included logo is unchanged.
+Live VXT URL: https://shootscore3-ship-it.github.io/Grumpys-weather-board/
 
-Continue using your existing GitHub Pages URL in VXT. Reload the board after GitHub Pages finishes publishing; if it still shows the previous version, refresh the VXT player cache.
+HALLOWEEN: The dark orange/purple/green theme runs throughout October using America/Chicago dates and returns to the normal theme in November. Cartoon pumpkins pulse in the footer, outside the forecast cards; corner webs and a small drifting bat decorate the header. Reduced-motion preferences disable these decorative animations.
 
-NORMAL: Current conditions, next six hours, and five-day forecast.
-STORM MODE: Twin Cities radar on the left, current conditions on the right, next six hours across the bottom. Five-day forecast hidden.
+Append ?theme=halloween to keep the Halloween look year-round, or ?theme=normal to turn it off. These settings work with the live forecast. No VXT URL change is needed for October.
 
-Radar activates for current thunderstorms, snow, freezing precipitation, or heavy rain; or these conditions in an hourly forecast overlapping the next two hours with precipitation probability at least 40%. Relevant NWS watches, warnings, and advisories covering St. Bonifacius also activate it. This uses forecast and alert information, not automated radar storm tracking.
+Current conditions, next six hours, five-day forecast, day/night sun and moon, precipitation effects, local alerts and automatic Twin Cities radar remain active. Weather refreshes every ten minutes; alerts and visible radar every two minutes. Storm mode activates for qualifying observed or near-term weather, or relevant NWS alerts, and returns to the forecast after a ten-minute hold. Radar failures show an unavailable message while conditions and alerts continue.
 
-Weather refreshes every 10 minutes; local alerts and visible radar refresh every 2 minutes. The normal layout returns 10 minutes after the last qualifying trigger. Expired alerts and weather responses older than 30 minutes stop triggering radar. Failed radar loads show an unavailable message and automatically retry.
+Source: Open-Meteo forecast, NWS alerts, NOAA/NWS KMPX animated radar. Check map timestamps for radar age. Radar colors indicate reflectivity, not guaranteed precipitation type.
 
-Radar source: NOAA / National Weather Service Twin Cities (KMPX) standard animated radar. The map includes its own observation times and reflectivity legend. Reflectivity colors show intensity, not a guaranteed rain/snow distinction. Hourly conditions provide precipitation type. Radar may lag observations; look at the timestamps on the map.
+For labeled sample forecast previews use ?demo=clear, ?demo=storm, or ?demo=snow. Radar in demos is still live. Remove demo= for the real forecast.
 
-PREVIEW: Upload radar-demo.html too, or append ?demo=storm to the board URL. Use ?demo=snow for sample snow conditions or ?demo=clear for the normal layout. Demo weather is clearly labeled and simulated; radar still shows actual current weather. Remove the query string for the live VXT board.
-
-The design scales a 1920x1080 layout to the screen. Actual playback in your VXT player still needs checking. This update has not been pushed to your GitHub repository.
+The 1920x1080 layout scales to the display, including 4K. Keep grumpys-logo.png beside index.html. After a published update, reload the VXT webpage if it is cached.
