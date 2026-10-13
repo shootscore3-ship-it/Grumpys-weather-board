@@ -457,6 +457,38 @@
     @media (prefers-reduced-motion:reduce) {
       .storm-mode .current-card, .storm-mode .radar-card { animation:none; }
     }
+
+    /* October decorations live outside forecast cards, radar, and alerts. */
+    .halloween-decor { display:none; position:absolute; inset:0; pointer-events:none; z-index:0; }
+    .topbar, .main-grid, .footer { position:relative; z-index:1; }
+    body.halloween { background:#09060f; --card-bg:rgba(12,8,19,.94); --card-border:rgba(167,91,222,.48); }
+    .halloween .sky::after { background:linear-gradient(180deg,rgba(9,4,17,.65),rgba(9,4,17,.88)); }
+    .halloween .path-guide { opacity:.12; }
+    .halloween .cloud { background:rgba(156,119,183,.15); }
+    .halloween .halloween-decor { display:block; }
+    .halloween .weather-app { grid-template-rows:auto minmax(0,1fr) 80px; }
+    .halloween .brand-title { color:#ff941f; letter-spacing:-.6px; }
+    .halloween .current-card { border-color:rgba(255,141,32,.65); }
+    .halloween .hourly-card { border-color:rgba(170,93,234,.65); }
+    .halloween .daily-card { border-color:rgba(122,191,64,.48); }
+    .halloween .section-title { color:#ffae51; }
+    .halloween .stat, .halloween .hour-box, .halloween .day-row { background:rgba(113,69,144,.14); border-color:rgba(178,140,200,.22); }
+    .halloween .stat-label { color:#edbeff; }
+    .halloween .loading { background:#0b0712; }
+    .halloween .radar-card { background:rgba(9,7,14,.97); }
+    .halloween .alert-banner { background:rgba(135,18,24,.96); }
+    .halloween-web { position:absolute; top:0; width:190px; height:130px; opacity:.36; }
+    .halloween-web.left { left:0; color:#b74bff; }
+    .halloween-web.right { right:0; color:#91db46; transform:scaleX(-1); }
+    .halloween-pumpkin { position:absolute; bottom:13px; width:90px; height:78px; }
+    .halloween-pumpkin.one { right:160px; }
+    .halloween-pumpkin.two { right:48px; }
+    .pumpkin-face { fill:#ffde49; animation:pumpkinGlow 6s ease-in-out infinite; }
+    .two .pumpkin-face { animation-delay:-2s; }
+    @keyframes pumpkinGlow { 0%,100% { opacity:1; } 45% { opacity:.5; } 55% { opacity:.85; } 65% { opacity:.6; } }
+    .halloween-bat { position:absolute; width:78px; height:34px; top:76px; right:400px; color:#a34fdd; animation:batDrift 12s ease-in-out infinite; }
+    @keyframes batDrift { 0%,100% { transform:translate(0,0) rotate(-3deg); } 50% { transform:translate(32px,-9px) rotate(3deg); } }
+    @media (prefers-reduced-motion:reduce) { .pumpkin-face, .halloween-bat { animation:none; } }
   </style>
 </head>
 <body>
@@ -478,6 +510,7 @@
   <div class="loading" id="loading">Loading St. Bonifacius Weather…</div>
 
   <main class="weather-app">
+    <div class="halloween-decor" aria-hidden="true"><svg class="halloween-web left" viewBox="0 0 190 130"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M0 0L190 0M0 0L185 44M0 0L152 90M0 0L84 126M0 0L0 130M0 0L40 130"/><path d="M0 30Q15 39 10 34Q34 38 33 20Q39 17 43 10Q45 7 47 0M0 62Q22 79 21 67Q62 74 65 40Q77 37 86 20Q94 16 98 0M0 100Q35 128 34 110Q101 116 103 63Q125 55 137 32Q149 27 154 0"/></g></svg><svg class="halloween-web right" viewBox="0 0 190 130"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M0 0L190 0M0 0L185 44M0 0L152 90M0 0L84 126M0 0L0 130M0 0L40 130"/><path d="M0 30Q15 39 10 34Q34 38 33 20Q39 17 43 10Q45 7 47 0M0 62Q22 79 21 67Q62 74 65 40Q77 37 86 20Q94 16 98 0M0 100Q35 128 34 110Q101 116 103 63Q125 55 137 32Q149 27 154 0"/></g></svg><svg class="halloween-pumpkin one" viewBox="0 0 120 104"><path d="M57 25Q55 7 70 5L78 12Q63 14 65 29" fill="#805136"/><g fill="#f57b16" stroke="#1b0d08" stroke-width="3"><ellipse cx="36" cy="61" rx="29" ry="37"/><ellipse cx="83" cy="61" rx="29" ry="37"/><ellipse cx="59" cy="62" rx="33" ry="39"/></g><g class="pumpkin-face" stroke="#201208" stroke-width="2.5" stroke-linejoin="round"><path d="M29 53L42 33L50 55ZM70 55L79 33L94 53Z"/><path d="M59 53L53 63L65 63Z"/><path d="M27 68L41 75L44 70L53 78L63 78L73 70L78 75L95 67Q85 92 72 88L67 83L53 83L48 88Q34 86 27 68Z"/></g></svg><svg class="halloween-pumpkin two" viewBox="0 0 120 104"><path d="M57 25Q55 7 70 5L78 12Q63 14 65 29" fill="#805136"/><g fill="#f57b16" stroke="#1b0d08" stroke-width="3"><ellipse cx="36" cy="61" rx="29" ry="37"/><ellipse cx="83" cy="61" rx="29" ry="37"/><ellipse cx="59" cy="62" rx="33" ry="39"/></g><g class="pumpkin-face" stroke="#201208" stroke-width="2.5" stroke-linejoin="round"><path d="M29 53L42 33L50 55ZM70 55L79 33L94 53Z"/><path d="M59 53L53 63L65 63Z"/><path d="M27 68L41 75L44 70L53 78L63 78L73 70L78 75L95 67Q85 92 72 88L67 83L53 83L48 88Q34 86 27 68Z"/></g></svg><svg class="halloween-bat" viewBox="0 0 120 50"><path fill="currentColor" d="M0 3Q21 6 37 25L43 22L47 9L54 17L65 17L73 9L77 22L84 25Q102 6 120 3L106 22Q92 18 91 33Q80 28 77 40L62 49L48 40Q43 28 30 33Q28 18 14 22Z"/></svg></div>
     <header class="topbar">
       <div class="logo-lockup">
         <img class="grumpys-logo" src="grumpys-logo.png" alt="Grumpy’s logo" />
@@ -607,6 +640,7 @@
     let radarGeneration = 0;
     let lastPrecipitation = "";
     const DEMO_MODE = new URLSearchParams(location.search).get("demo");
+    const THEME_OVERRIDE = new URLSearchParams(location.search).get("theme");
     const IS_DEMO = ["storm", "snow", "clear"].includes(DEMO_MODE);
     const RADAR_URL = "https://radar.weather.gov/ridge/standard/KMPX_loop.gif";
     const STORM_CODES = new Set([56,57,65,66,67,71,73,75,77,82,85,86,95,96,99]);
@@ -778,6 +812,7 @@
     }
 
     function updateClock() {
+      applySeasonalTheme();
       const now = new Date();
       els.clock.textContent = new Intl.DateTimeFormat("en-US", {
         timeZone: TIMEZONE,
@@ -933,6 +968,11 @@
         els.sun.style.opacity = 0;
       }
 
+      if (getHolidayEffect() === "halloween") {
+        background = isDay
+          ? "linear-gradient(180deg,#1a0c2b 0%,#261229 60%,#2b170e 100%)"
+          : "linear-gradient(180deg,#06040d 0%,#160b25 60%,#100a18 100%)";
+      }
       els.sky.style.background = background;
       els.sky.style.filter = filter;
       els.clouds.style.opacity = cloudy || raining || snowing ? 0.68 : 0.30;
@@ -975,7 +1015,6 @@
       if (holiday === "newyear") html += '<div class="holiday-badge" style="position:absolute; right:0; top:8px; font-size:42px; filter:drop-shadow(0 8px 12px rgba(0,0,0,.35));">🎆</div>';
       if (holiday === "valentine") html += '<div class="holiday-badge" style="position:absolute; right:4px; top:10px; font-size:44px; filter:drop-shadow(0 8px 12px rgba(0,0,0,.35));">❤️</div>';
       if (holiday === "stpatricks") html += '<div class="holiday-badge" style="position:absolute; right:2px; top:12px; font-size:46px; filter:drop-shadow(0 8px 12px rgba(0,0,0,.35));">☘️</div>';
-      if (holiday === "halloween") html += '<div class="holiday-badge" style="position:absolute; right:2px; top:8px; font-size:48px; filter:drop-shadow(0 8px 12px rgba(0,0,0,.35));">🎃</div>';
       if (holiday === "thanksgiving") html += '<div class="holiday-badge" style="position:absolute; right:0; top:10px; font-size:48px; filter:drop-shadow(0 8px 12px rgba(0,0,0,.35));">🦃</div>';
       if (holiday === "christmas") html += '<div class="holiday-badge" style="position:absolute; right:0; top:6px; font-size:48px; filter:drop-shadow(0 8px 12px rgba(0,0,0,.35));">🎄</div>'; 
       els.weatherVisual.innerHTML = html;
@@ -994,17 +1033,23 @@
       const parts = new Intl.DateTimeFormat("en-US", { timeZone: TIMEZONE, month: "numeric", day: "numeric" }).formatToParts(now);
       const month = Number(parts.find(p => p.type === "month").value);
       const day = Number(parts.find(p => p.type === "day").value);
+      if (THEME_OVERRIDE === "halloween") return "halloween";
       if (month === 1 && day === 1) return "newyear";
       if (month === 2 && day === 14) return "valentine";
       if (month === 3 && day === 17) return "stpatricks";
       if (month === 7 && day === 4) return "fireworks";
-      if (month === 10 && day === 31) return "halloween";
+      if (THEME_OVERRIDE === "halloween" || (month === 10 && THEME_OVERRIDE !== "normal")) return "halloween";
       if (month === 11 && day >= 22 && day <= 28) return "thanksgiving";
       if (month === 12 && day === 24 || month === 12 && day === 25) return "christmas";
       return null;
     }
 
+    function applySeasonalTheme() {
+      document.body.classList.toggle("halloween", getHolidayEffect() === "halloween");
+    }
+
     function renderHolidayLayer() {
+      applySeasonalTheme();
       const effect = getHolidayEffect();
       const layer = document.getElementById("holidayLayer");
       if (!layer) return;
