@@ -639,6 +639,11 @@
     let radarTimer = null;
     let radarGeneration = 0;
     let lastPrecipitation = "";
+    let weatherRequestActive = false;
+    let weatherRetryTimer = null;
+    let weatherFailures = 0;
+    const WEATHER_CACHE_KEY = "grumpys-weather-v1";
+    const MAX_CACHE_AGE = 30 * 60000;
     const DEMO_MODE = new URLSearchParams(location.search).get("demo");
     const THEME_OVERRIDE = new URLSearchParams(location.search).get("theme");
     const IS_DEMO = ["storm", "snow", "clear"].includes(DEMO_MODE);
@@ -1065,9 +1070,9 @@
       }
     }
 
-    function renderWeather(data) {
+    function renderWeather(data, receivedAt = Date.now()) {
       latestWeather = data;
-      weatherReceivedAt = Date.now();
+      weatherReceivedAt = receivedAt;
       const current = data.current;
       const daily = data.daily;
       const hourly = data.hourly;
@@ -1143,7 +1148,43 @@
       renderAlerts();
     }
 
+    function restoreWeatherCache() {
+      try {
+        const cached = JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY));
+        const age = Date.now() - cached?.receivedAt;
+        const today = new Intl.DateTimeFormat("en-CA", {timeZone:TIMEZONE}).format(new Date());
+        if (!cached || !Number.isFinite(age) || age < 0 || age > MAX_CACHE_AGE || cached.data?.daily?.time?.[0] !== today) return;
+        renderWeather(cached.data, cached.receivedAt);
+        els.lastUpdated.textContent = `Saved forecast • Updated ${formatTime(new Date(cached.receivedAt))} • Connecting…`;
+      } catch (error) { console.warn("Saved forecast unavailable", error); }
+    }
+
+    function showWeatherFailure(retrySeconds) {
+      // Leave usable cards visible instead of trapping the display behind a loading overlay.
+      els.loading.classList.add("hide");
+      if (latestWeather && Date.now() - weatherReceivedAt <= MAX_CACHE_AGE) {
+        els.lastUpdated.textContent = `Weather delayed • Updated ${formatTime(new Date(weatherReceivedAt))} • Retrying in ${retrySeconds}s`;
+      } else {
+        latestWeather = null;
+        weatherReceivedAt = 0;
+        els.currentTemp.textContent = "--°";
+        els.conditionText.textContent = "Weather unavailable";
+        els.feelsLike.textContent = "Waiting for live weather";
+        els.summaryLine.textContent = "Forecast will return automatically";
+        els.weatherVisual.innerHTML = "";
+        for (const name of ["highLow", "precipChance", "windSpeed", "sunsetTime"]) els[name].textContent = "--";
+        els.hourlyRow.innerHTML = "";
+        els.dailyList.innerHTML = "";
+        els.lastUpdated.textContent = `Weather connection delayed • Retrying in ${retrySeconds}s`;
+      }
+      updateStormMode();
+    }
+
     async function loadWeather() {
+      if (weatherRequestActive) return;
+      weatherRequestActive = true;
+      clearTimeout(weatherRetryTimer);
+      weatherRetryTimer = null;
       const params = new URLSearchParams({
         latitude: LATITUDE,
         longitude: LONGITUDE,
@@ -1183,12 +1224,19 @@
         const response = await fetchWithTimeout(url, { cache: "no-store" });
         if (!response.ok) throw new Error(`Weather request failed: ${response.status}`);
         const data = await response.json();
-        renderWeather(normalizeWeatherTimes(data));
+        if (!data.current || !Number.isFinite(data.current.temperature_2m) || !data.hourly?.time?.length || !data.daily?.time?.length) throw new Error("Incomplete forecast response");
+        const normalized = normalizeWeatherTimes(data);
+        renderWeather(normalized);
+        weatherFailures = 0;
+        try { localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({data:normalized, receivedAt:weatherReceivedAt})); }
+        catch (error) { console.warn("Forecast could not be saved", error); }
       } catch (error) {
         console.error(error);
-        els.loading.textContent = "Weather could not load. Retrying automatically…";
-        if (latestWeather) els.lastUpdated.textContent = `Weather delayed • Last update ${formatTime(new Date(weatherReceivedAt))}`;
-        updateStormMode();
+        const retrySeconds = Math.min(120, 30 * 2 ** Math.min(weatherFailures++, 2));
+        showWeatherFailure(retrySeconds);
+        weatherRetryTimer = setTimeout(loadWeather, retrySeconds * 1000);
+      } finally {
+        weatherRequestActive = false;
       }
     }
 
@@ -1206,6 +1254,8 @@
       runDemo();
       setInterval(runDemo, 60000);
     } else {
+      restoreWeatherCache();
+      addEventListener("online", loadWeather);
       loadWeather();
       loadAlerts();
       setInterval(loadWeather, REFRESH_MINUTES * 60 * 1000);
